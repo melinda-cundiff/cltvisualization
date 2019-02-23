@@ -1,0 +1,242 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Latex Template
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Type of document
+\documentclass[letterpaper,10pt]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%This section is known as the Preamble 
+\topmargin  =-0.in   % beyond 25.mm
+\oddsidemargin  =-0.in    % beyond 25.mm
+\evensidemargin =-0.in    % beyond 25.mm
+\headheight =0.mm
+\headsep  =0.mm
+\textheight =9.in    % 207.5mm
+\textwidth  =6.5in
+
+%Gives the Latex Packages needed you may need to add to the list based on your latex needs
+\usepackage{graphicx,listings,setspace,multicol,enumitem,alltt,hyperref}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+\SweaveOpts{concordance=TRUE} %Needed for Knitr
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\hrule
+\begin{center}
+{\large Central Limit Theorem\\
+STA 580}\\
+Melinda Cundiff
+\end{center}
+\hrule
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Example of Homework Problem
+
+\section*{Visualize the Central Limit Theorem}
+This is a function to help a student visualize the central limit theorem for a single mean. 
+
+\noindent Code:
+
+<<keep.source=TRUE>>=  #Code Chunks always start with this line and end with a @, Add in fig=TRUE to print plots
+# used the following sources to help solve this problem:
+# https://www.statmethods.net/advgraphs/layout.html
+# hangman, example 3, example 4, example 12, homework 6
+
+distributionFun = function(shape, sample.size, n.samples){
+# Takes the following as arguments:
+# Returns an error if any of the arguments are the incorrect format.
+
+  # shape. Where shape can take the value bell, right, or left. The 
+  # default for shape should be bell.
+  
+  # not entered correctly
+  if(shape != "bell" && shape != "left" && shape != "right" && !missing(shape)){
+    stop("Not a valid shape")
+  }
+  # default
+  if(missing(shape)){
+    shape = "bell"
+  }
+
+  
+  # sample.size. Where sample.size is an integer from 1 to 500. The 
+  # default for sample.size should be 100.
+  
+  # not entered correctly
+  if(sample.size <= 1 && sample.size >= 500 && !missing(sample.size)){
+    stop("Not a valid sample size")
+  }
+  # default
+  if(missing(sample.size)){
+    sample.size = 100
+  }
+ 
+  # n.samples. Where n.samples is an integer from 1 to 100000. The 
+  # default for n.samples should be 10000.
+
+  # not entered correctly
+  if(n.samples <= 1 && n.samples >= 100000 && !missing(n.samples)){
+    stop("Not a valid number of samples")
+  }
+  # default
+  if(missing(n.samples)){
+    n.samples = 10000
+  }
+# Simulates population data based on shape.
+# Selects n.samples of size sample.size from the population data.
+# Calculates the sample mean of each sample.
+
+# Outputs two side by side histograms: one of the population data and one 
+# of the simulated sample means.
+  # Each plot should include a title which indicates the type of distribution
+  # The x-axis should be labeled simulated values
+  # The y-axis should be labeled frequency
+    # For left-skewed population data color the bars light grey, 
+    # for bell shaped population data color the bars grey and 
+    # for right-skewed population data color the bars dark grey.
+
+  # If the user chooses left skewed simulate 100000 random draws from a 
+  # Beta(100,1) distribution. Multiply each value by 10 million
+  
+  if(shape == "left"){
+    leftDist = 10000000*rbeta(100000, 100, 1)
+    leftMeans = vector(length = n.samples)
+    leftMeans[1:n.samples] = 0
+    for(i in 1:n.samples){
+      leftSamples = sample(leftDist, sample.size)
+      leftMeans[i] = mean(leftSamples)
+    }
+    par(mfrow = c(1,2))
+    left.dist.hist = hist(leftDist, xlab = "Simulated Values", 
+                          ylab = "Frequency", col = "light grey")
+    left.means.hist = hist(leftMeans, xlab = "Simulated Values", 
+                           ylab = "Frequency", col = "light grey")
+    return(list(left.dist.hist, left.means.hist))
+  }
+
+  # If the user chooses right skewed simulate 100000 random draws from a 
+  # Beta(1,100) distribution. Multiply each value by 10 million.
+  
+  if(shape == "right"){
+    rightDist = 10000000*rbeta(100000, 1, 100)
+    rightMeans = vector(length = n.samples)
+    rightMeans[1:n.samples] = 0
+    for(i in 1:n.samples){
+      rightSamples = sample(rightDist, sample.size)
+      rightMeans[i] = mean(rightSamples)
+    }  
+    par(mfrow = c(1,2))
+    right.dist.hist = hist(rightDist, xlab = "Simulated Values", 
+                           ylab = "Frequency", col = "grey")
+    right.means.hist = hist(rightMeans, xlab = "Simulated Values", 
+                            ylab = "Frequency", col = "grey")
+    return(list(right.dist.hist, right.means.hist))
+  }  
+  
+  
+  # If the user chooses bell simulate 100000 random draws from a 
+  # Beta(100,100) distribution. Multiply each value by 10 million.
+
+  if(shape == "bell"){
+    bellDist = 10000000*rbeta(100000, 100, 100)
+    bellMeans = vector(length = n.samples)
+    bellMeans[1:n.samples] = 0
+    for(i in 1:n.samples){
+      bellSamples = sample(bellDist, sample.size)
+      bellMeans[i] = mean(bellSamples)
+    }
+    par(mfrow = c(1,2))
+    bell.dist.hist = hist(bellDist, xlab = "Simulated Values", 
+                          ylab = "Frequency", col = "dark grey")
+    bell.means.hist = hist(bellMeans, xlab = "Simulated Values", 
+                           ylab = "Frequency", col = "dark grey")
+    return(list(bell.dist.hist, bell.means.hist))
+  }
+    
+}
+@
+\section*{How Sample Sizes Affect Normality} Generate three sets of plots to demonstrate the affects sample sizes have on the normality of a distribution.
+\subsection*{Small Sample Sizes} Use your function to generate a single plot which contains six histograms. For each call of the function use  \textbf{n.samples} =10000 and \textbf{sample.size} =10.
+\begin{itemize}
+\item  Where the top two histograms compare the population distribution and sampling distribution when the population data is left skewed.
+\item  Where the top two histograms compare the population distribution and sampling distribution when the population data is right skewed.
+\item  Where the top two histograms compare the population distribution and sampling distribution when the population data is bell shaped.
+\end{itemize}
+<<keep.source=TRUE>>=  #Code Chunks always start with this line and end with a @, Add in fig=TRUE to print plots
+# used homework 3 latex
+
+leftHist = distributionFun(shape = "left", sample.size = 10, n.samples = 10000)
+bellHist = distributionFun(shape = "bell", sample.size = 10, n.samples = 10000)
+rightHist = distributionFun(shape = "right", sample.size = 10, n.samples = 10000)
+
+pdf('smallSampleSizes.pdf')
+par(mfrow = c(3,2))
+plot(leftHist[[1]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "light grey")
+plot(leftHist[[2]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "light grey")
+plot(bellHist[[1]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "dark grey")
+plot(bellHist[[2]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "dark grey")
+plot(rightHist[[1]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "grey")
+plot(rightHist[[2]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "grey")
+dev.off() # finalizes the file
+@
+\includegraphics{smallSampleSizes.pdf} % prints the histograms
+\subsection*{Medium Sample Sizes} Create another plot where  \textbf{n.samples} =10000 and \textbf{sample.size} =30.
+<<keep.source=TRUE>>=  #Code Chunks always start with this line and end with a @, Add in fig=TRUE to print plots
+leftHist = distributionFun(shape = "left", sample.size = 30, n.samples = 10000)
+bellHist = distributionFun(shape = "bell", sample.size = 30, n.samples = 10000)
+rightHist = distributionFun(shape = "right", sample.size = 30, n.samples = 10000)
+
+pdf('midSampleSizes.pdf')
+par(mfrow = c(3,2))
+plot(leftHist[[1]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "light grey")
+plot(leftHist[[2]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "light grey")
+plot(bellHist[[1]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "dark grey")
+plot(bellHist[[2]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "dark grey")
+plot(rightHist[[1]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "grey")
+plot(rightHist[[2]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "grey")
+dev.off() # finalizes the file
+@
+\includegraphics{midSampleSizes.pdf} % prints the histograms
+\subsection*{Large Sample Sizes} Create another plot where  \textbf{n.samples} =10000 and \textbf{sample.size} =100.
+<<keep.source=TRUE>>=  #Code Chunks always start with this line and end with a @, Add in fig=TRUE to print plots
+leftHist = distributionFun(shape = "left", sample.size = 100, n.samples = 10000)
+bellHist = distributionFun(shape = "bell", sample.size = 100, n.samples = 10000)
+rightHist = distributionFun(shape = "right", sample.size = 100, n.samples = 10000)
+
+pdf('largeSampleSizes.pdf')
+par(mfrow = c(3,2))
+plot(leftHist[[1]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "light grey")
+plot(leftHist[[2]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "light grey")
+plot(bellHist[[1]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "dark grey")
+plot(bellHist[[2]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "dark grey")
+plot(rightHist[[1]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "grey")
+plot(rightHist[[2]], xlab = "Simulated Values", 
+     ylab = "Frequency", col = "grey")
+dev.off() # finalizes the file
+@
+\includegraphics{largeSampleSizes.pdf} % prints the boxplot
+\subsection*{Summary} The plots of the means for the left and right distributions, created by using a sample size of 10, are very skewed. The plots created by using a sample size of 30 are slightly skewed, but it is a massive improvement. The plots created by using a sample size of 100 are generally normally distributed, but they may also have a slight skew. Overall, these plots illustrate how using a minimum sample size of 30 is required for non-normal (bell-shaped) data in order to perform tests that require normal data. While larger sample sizes may be useful for improving normality, they are not necessary.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
